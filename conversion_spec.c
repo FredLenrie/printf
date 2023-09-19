@@ -1,4 +1,7 @@
 #include "main.h"
+#include <stdarg.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 /**
  * print_unsigned - Prints an unsigned number
