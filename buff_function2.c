@@ -1,4 +1,4 @@
-#include "holberton.h"
+#include "main.h"
 
 /**
  * print_num - Copy the given int one digit at a time to the buffer to print
