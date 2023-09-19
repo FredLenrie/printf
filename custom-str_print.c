@@ -1,4 +1,6 @@
 #include "main.h"
+#include <stdarg.h>
+#include <stdlib.h>
 
 /**
  * print_rev - prints the reversed string
@@ -8,13 +10,14 @@
  * @buff_ind: current buffer index
  * Return: numbers of chars written to buffer
  */
-int print_rev(va_list args, char buffer[], int *buff_len, int *buff_ind)
+
+int print_rev(va_list args_list, char buffer[], int *buff_len, int *buff_ind)
 {
 	char *str;
 	int i, num;
 
 	i = num = 0;
-	str = va_arg(args, char *);
+	str = va_arg(args_list, char *);
 	if (str == NULL)
 		str = "(nil)";
 	while (str[i] != '\0')
@@ -39,13 +42,13 @@ int print_rev(va_list args, char buffer[], int *buff_len, int *buff_ind)
  * @buff_ind: current buffer index
  * Return: numbers of chars written to buffer
  */
-int print_rot13(va_list args, char buffer[], int *buff_len, int *buff_ind)
+int print_rot13(va_list args_list, char buffer[], int *buff_len, int *buff_ind)
 {
 	char *str, temp;
 	int i, num;
 
 	i = num = 0;
-	str = va_arg(args, char *);
+	str = va_arg(args_list, char *);
 	if (str == NULL)
 		str = "(nil)";
 	while (str[i] != '\0')
@@ -75,13 +78,13 @@ int print_rot13(va_list args, char buffer[], int *buff_len, int *buff_ind)
 * @buff_ind: current buffer index
 * Return: numbers of chars written to buffer
 **/
-int print_p(va_list args, char buffer[], int *buff_len, int *buff_ind)
+int print_p(va_list args_list, char buffer[], int *buff_len, int *buff_ind)
 {
 	char *str;
 	int i, num;
 	size_t add;
 
-	add = (size_t)va_arg(args, void *);
+	add = (size_t)va_arg(args_list, void *);
 	str = size_tHex('x', add);
 	if (str == NULL)
 		return (0);

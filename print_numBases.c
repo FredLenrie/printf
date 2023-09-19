@@ -1,4 +1,7 @@
 #include "main.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
 
 /**
  * octConverter - represents a decimal number greater than 7 to octal

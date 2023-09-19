@@ -1,4 +1,7 @@
 #include "main.h"
+#include <stdarg.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 /**
  * print_oct - Print octal conversion of a decimal number

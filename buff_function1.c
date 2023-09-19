@@ -1,4 +1,6 @@
 #include "main.h"
+#include <stdarg.h>
+#include <stdlib.h>
 
 /**
  * print_c - Copy a character into the buffer
