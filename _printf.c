@@ -1,146 +1,69 @@
 #include "main.h"
-#include <stdarg.h>
-#include <stdlib.h>
-#include <unistd.h>
+
+void print_buffer(char buffer[], int *buffpos);
 
 /**
-* buffer_cpy - Copies the given character over to the buffer
-* @formatter: Character to copy over
-* @buffer: Buffer being copied to
-* @buff_lenptr: Pointer to the length of the buffer, the number of
-* characters in the buffer
-* @buff_indptr: Pointer to the position in the buffer
-* Return: Number of characters copied to buffer
-*/
-
-int buffer_cpy(char formatter, char buffer[],
-		     int *buff_lenptr, int *buff_indptr)
-{
-	int print_char;
-
-	print_char = 0;
-	buffer[*buff_indptr] = formatter;
-	*buff_indptr += 1;
-	*buff_lenptr += 1;
-	if (*buff_lenptr == 1024)
-	{
-		print_buffer(buffer, buff_lenptr, buff_indptr);
-	}
-	print_char++;
-	return (print_char);
-}
-
-/**
-* check_conversion - Checks formatter character to see if
-* it's a conversion specifier
-* @formatter: The format character being checked
-* @conversions: Struct holding conversion specifiers & function pointers to
-* @appropriate functions for corresponding conversion specifier
-* @buffer: Buffer needed to copy to when calling function
-* @buff_lenptr: Pointer to the length of the buffer
-* @buff_indptr: Pointer to the position within the buffer
-* @args_list: va_list holding all given arguments to _printf function
-* Return: Return the number of characters copied to buffer if a
-* function is called, 0 if no function is called
-*/
-
-int check_conversion(char formatter, char_funcs_t conversions[], char buffer[],
-		     int *buff_lenptr, int *buff_indptr, va_list args_list)
-{
-	int j, print_char;
-
-	print_char = 0;
-	for (j = 0; j < 13; j++)
-	{
-		if (formatter == *conversions[j].c)
-		{
-			print_char += conversions[j].f(args_list, buffer, buff_lenptr,
-						  buff_indptr);
-			return (print_char);
-		}
-	}
-	return (0);
-}
-
-/**
-* formatPrinter - finds the formatters function and prints its arguement
-* @format: The format character being checked
-* @conversions: Struct holding conversion specifiers & function pointers to
-* appropriate functions for corresponding conversion specifier
-* @buffer: Buffer needed to copy to when calling function
-* @buff_lenptr: Pointer to the length of the buffer
-* @buff_indptr: Pointer to the position within the buffer
-* @args_list: va_list holding all given arguments to _printf function
-* Return: Return the number of characters copied to buffer if a
-* function is called, 0 if no function is called
-*/
-
-int formatPrinter(const char *format, va_list args_list, char buffer[],
-		  int *buff_lenptr, int *buff_indptr, char_funcs_t conversions[])
-{
-	int i, print_char, print;
-
-	print_char = 0;
-	for (i = 0; format[i] != '\0' && format != NULL; i++)
-	{
-		if (format[i] == '%')
-		{
-			i++;
-			print = check_conversion(format[i], conversions,
-						 buffer, buff_lenptr, buff_indptr,
-						 args_list);
-			if (print == 0)
-				print_char += buffer_cpy(format[i], buffer,
-							buff_lenptr, buff_indptr);
-			print_char += print;
-		}
-		else
-		{
-			print_char += buffer_cpy(format[i], buffer, buff_lenptr,
-						buff_indptr);
-		}
-	}
-	return (print_char);
-}
-
-/**
- * _printf - A function that produces formatted output
- * @format: Format specifier.
- * Return: Printed characters excluding the null byte
+ * _printf - Printf function
+ * @format: format.
+ * Return: Printed chars.
  */
 
 int _printf(const char *format, ...)
 {
-	va_list args_list;
-	char buffer[1024];
-	int print_char, buff_len, buff_ind, *buff_lenptr, *buff_indptr;
-	char_funcs_t conversions[] = {{"c", print_c},
-				      {"s", print_s},
-				      {"i", print_int},
-				      {"d", print_int},
-				      {"u", print_u},
-				      {"o", print_oct},
-				      {"x", print_hex},
-				      {"X", print_heX},
-				      {"b", print_bin},
-				      {"S", print_S},
-				      {"r", print_rev},
-				      {"R", print_rot13},
-				      {"p", print_p},
-	};
+	int i, printed = 0, print_char = 0;
+	int flags, width, precision, size, buffpos = 0;
+	va_list list_args;
+	char buffer[BUFF_SIZE];
 
-	init_buffer(buffer);
-	print_char = buff_ind = 0;
-	buff_len = 1;
-	buff_lenptr = &buff_len;
-	buff_indptr = &buff_ind;
+	if (format == NULL)
+		return (-1);
 
-	va_start(args_list, format);
-	if (format == NULL || args_list == NULL)
-		return (print_char);
-	print_char = formatPrinter(format, args_list, buffer,
-			      buff_lenptr, buff_indptr, conversions);
-	print_buffer(buffer, buff_lenptr, buff_indptr);
-	va_end(args_list);
+	va_start(list_args, format);
+
+	for (i = 0; format && format[i] != '\0'; i++)
+	{
+		if (format[i] != '%')
+		{
+			buffer[buffpos++] = format[i];
+			if (buffpos == BUFF_SIZE)
+				print_buffer(buffer, &buffpos);
+			/* write(1, &format[i], 1);*/
+			print_char++;
+		}
+		else
+		{
+			print_buffer(buffer, &buffpos);
+			flags = get_flags(format, &i);
+			width = get_width(format, &i, list_args);
+			precision = get_precision(format, &i, list_args);
+			size = get_size(format, &i);
+			++i;
+			printed = handle_print(format, &i, list_args, buffer,
+				flags, width, precision, size);
+			if (printed == -1)
+				return (-1);
+			print_char += printed;
+		}
+	}
+
+	print_buffer(buffer, &buffpos);
+
+	va_end(list_args);
+
 	return (print_char);
 }
+
+/**
+ * print_buffer - Prints the contents of the buffer if it exist
+ * @buffer: Array of chars
+ * @buffpos: Index at which to add next char, represents the length.
+ */
+
+void print_buffer(char buffer[], int *buffpos)
+{
+	if (*buffpos > 0)
+		write(1, &buffer[0], *buffpos);
+
+	*buffpos = 0;
+}
+
