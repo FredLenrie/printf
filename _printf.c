@@ -36,13 +36,13 @@ int buffer_cpy(char formatter, char buffer[],
 * @buffer: Buffer needed to copy to when calling function
 * @buff_lenptr: Pointer to the length of the buffer
 * @buff_indptr: Pointer to the position within the buffer
-* @print_this: va_list holding all given arguments to _printf function
+* @args_list: va_list holding all given arguments to _printf function
 * Return: Return the number of characters copied to buffer if a
 * function is called, 0 if no function is called
 */
 
 int check_conversion(char formatter, char_funcs_t conversions[], char buffer[],
-		     int *buff_lenptr, int *buff_indptr, va_list print_this)
+		     int *buff_lenptr, int *buff_indptr, va_list args_list)
 {
 	int j, print_char;
 
@@ -51,7 +51,7 @@ int check_conversion(char formatter, char_funcs_t conversions[], char buffer[],
 	{
 		if (formatter == *conversions[j].c)
 		{
-			print_char += conversions[j].f(print_this, buffer, buff_lenptr,
+			print_char += conversions[j].f(args_list, buffer, buff_lenptr,
 						  buff_indptr);
 			return (print_char);
 		}
@@ -67,12 +67,12 @@ int check_conversion(char formatter, char_funcs_t conversions[], char buffer[],
 * @buffer: Buffer needed to copy to when calling function
 * @buff_lenptr: Pointer to the length of the buffer
 * @buff_indptr: Pointer to the position within the buffer
-* @print_this: va_list holding all given arguments to _printf function
+* @args_list: va_list holding all given arguments to _printf function
 * Return: Return the number of characters copied to buffer if a
 * function is called, 0 if no function is called
 */
 
-int formatPrinter(const char *format, va_list print_this, char buffer[],
+int formatPrinter(const char *format, va_list args_list, char buffer[],
 		  int *buff_lenptr, int *buff_indptr, char_funcs_t conversions[])
 {
 	int i, print_char, print;
@@ -85,7 +85,7 @@ int formatPrinter(const char *format, va_list print_this, char buffer[],
 			i++;
 			print = check_conversion(format[i], conversions,
 						 buffer, buff_lenptr, buff_indptr,
-						 print_this);
+						 args_list);
 			if (print == 0)
 				print_char += buffer_cpy(format[i], buffer,
 							buff_lenptr, buff_indptr);
